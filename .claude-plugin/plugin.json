@@ -1,0 +1,12 @@
+{
+  "name": "pcc",
+  "version": "0.1.0",
+  "description": "paikpaik claude code - personal Claude Code plugin (agents, skills, commands, hooks, rules)",
+  "author": {
+    "name": "jaeyeol"
+  },
+  "license": "MIT",
+  "mcpServers": {},
+  "commands": ["./commands/"],
+  "skills": ["./skills/"]
+}

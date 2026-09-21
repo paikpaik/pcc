@@ -1,0 +1,5 @@
+# 참고용으로 클론해 둔 ECC 원본 — pcc 저장소에는 포함하지 않음
+repo/
+
+node_modules/
+.DS_Store
