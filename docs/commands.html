@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>pcc 가이드 — Commands</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="shell">
+
+  <nav class="toc" aria-label="목차">
+    <div class="toc-inner">
+      <div class="group-label">가이드</div>
+      <a href="index.html" data-page="index.html">개요</a>
+      <a href="index.html#structure" data-page="index.html">폴더 구조</a>
+      <div class="group-label">컴포넌트</div>
+      <a href="agents.html" data-page="agents.html">Agents</a>
+      <a href="commands.html" data-page="commands.html">Commands</a>
+      <a href="skills.html" data-page="skills.html">Skills</a>
+      <a href="hooks.html" data-page="hooks.html">Hooks</a>
+      <a href="rules.html" data-page="rules.html">Rules</a>
+      <div class="group-label">참고</div>
+      <a href="index.html#manifest" data-page="index.html">매니페스트 함정</a>
+      <a href="index.html#roadmap" data-page="index.html">로드맵</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <header class="hero">
+      <div class="eyebrow">pcc · commands/</div>
+      <h1>Commands</h1>
+      <p>
+        사용자가 직접 호출하는 슬래시 명령어. 마크다운 + <code>description:</code> frontmatter로
+        정의합니다. 각 파일은 실제 원문(영어)과 전체 한국어 번역을 탭으로 함께 제공합니다.
+      </p>
+    </header>
+
+    <section id="code-review">
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">commands/code-review.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <table class="meta">
+          <tr><th>description</th><td>Review local uncommitted changes, or a GitHub PR (pass a PR number/URL)</td></tr>
+          <tr><th>argument-hint</th><td>[pr-number | pr-url | blank for local review]</td></tr>
+        </table>
+        <div class="meta-ko"><strong>번역:</strong> 로컬에 커밋되지 않은 변경사항, 또는 GitHub PR(번호/URL 전달)을 리뷰.</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <p><strong>입력:</strong> <code>$ARGUMENTS</code></p>
+
+            <h4>모드 선택</h4>
+            <p><code>$ARGUMENTS</code>에 PR 번호나 URL이 포함되어 있으면 → <strong>PR 모드</strong>. 그렇지 않으면 → <strong>로컬 모드</strong>.</p>
+
+            <h4>로컬 모드</h4>
+            <ol>
+              <li><code>git diff --staged</code>와 <code>git diff</code>를 실행. 둘 다 비어 있으면 <code>git log --oneline -5</code>로 대체해 최신 커밋을 리뷰.</li>
+              <li>리뷰할 게 없으면 그렇게 말하고 멈춤.</li>
+              <li>diff와 변경된 파일의 전체 컨텍스트를 <code>code-reviewer</code> 서브에이전트에게 넘겨 리뷰를 위임.</li>
+              <li>서브에이전트의 발견 사항과 판정(APPROVE / WARNING / BLOCK)을 그대로 출력.</li>
+            </ol>
+
+            <h4>PR 모드</h4>
+            <ol>
+              <li><code>gh pr view &lt;NUMBER&gt; --json number,title,body,author,baseRefName,headRefName,changedFiles</code></li>
+              <li><code>gh pr diff &lt;NUMBER&gt;</code></li>
+              <li>해당 diff와 PR head 시점의 변경 파일 전체 내용을 <code>code-reviewer</code> 서브에이전트에게 넘겨 리뷰를 위임.</li>
+              <li>발견 사항과 판정을 출력.</li>
+              <li><strong>리뷰를 GitHub에 자동으로 게시하지 않음.</strong> 요약을 보여주고 <code>gh pr review</code> 실행 전에 반드시 확인을 받음 — 리뷰 게시는 공유 상태에 남는 가시적인 행동이라 매번 명시적 확인이 필요.</li>
+            </ol>
+
+            <h4>예외 상황</h4>
+            <ul>
+              <li><code>gh</code> CLI가 없는 경우 → 현재 작업 트리에 대한 로컬 모드 리뷰로 대체하고, PR 모드를 건너뛴 이유를 설명.</li>
+              <li>대규모 diff(변경 파일 50개 초과) → 리뷰 범위에 대해 경고하고, 테스트/설정/문서보다 소스 파일을 우선.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code>---
+description: Review local uncommitted changes, or a GitHub PR (pass a PR number/URL)
+argument-hint: [pr-number | pr-url | blank for local review]
+---
+
+**Input**: $ARGUMENTS
+
+## Mode selection
+
+If `$ARGUMENTS` contains a PR number or URL → **PR mode**. Otherwise → **Local mode**.
+
+## Local mode
+
+1. Run `git diff --staged` and `git diff`. If both are empty, fall back to `git log --oneline -5` and review the latest commit instead.
+2. If there is nothing to review, say so and stop.
+3. Delegate the review to the `code-reviewer` subagent, passing it the diff and full context of the changed files.
+4. Print the subagent's findings and verdict (APPROVE / WARNING / BLOCK) as-is.
+
+## PR mode
+
+1. `gh pr view &lt;NUMBER&gt; --json number,title,body,author,baseRefName,headRefName,changedFiles`
+2. `gh pr diff &lt;NUMBER&gt;`
+3. Delegate the review to the `code-reviewer` subagent using that diff plus the full contents of each changed file at the PR head revision.
+4. Print the findings and verdict.
+5. **Do not post the review to GitHub automatically.** Show the summary and ask before running `gh pr review` — posting a review is a visible action on shared state and needs explicit confirmation each time.
+
+## Edge cases
+
+- No `gh` CLI available → fall back to local-mode review of the current working tree, and say why PR mode was skipped.
+- Large diff (&gt;50 changed files) → warn about review scope, prioritize source files over tests/config/docs.
+</code></pre>
+        </div>
+      </article>
+    </section>
+
+  </main>
+</div>
+
+<script src="nav.js"></script>
+<script src="tabs.js"></script>
+</body>
+</html>

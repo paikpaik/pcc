@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>pcc 가이드 — Rules</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="shell">
+
+  <nav class="toc" aria-label="목차">
+    <div class="toc-inner">
+      <div class="group-label">가이드</div>
+      <a href="index.html" data-page="index.html">개요</a>
+      <a href="index.html#structure" data-page="index.html">폴더 구조</a>
+      <div class="group-label">컴포넌트</div>
+      <a href="agents.html" data-page="agents.html">Agents</a>
+      <a href="commands.html" data-page="commands.html">Commands</a>
+      <a href="skills.html" data-page="skills.html">Skills</a>
+      <a href="hooks.html" data-page="hooks.html">Hooks</a>
+      <a href="rules.html" data-page="rules.html">Rules</a>
+      <div class="group-label">참고</div>
+      <a href="index.html#manifest" data-page="index.html">매니페스트 함정</a>
+      <a href="index.html#roadmap" data-page="index.html">로드맵</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <header class="hero">
+      <div class="eyebrow">pcc · rules/</div>
+      <h1>Rules</h1>
+      <p>
+        언어별 코딩 스타일 / 보안 / 테스트 규칙. <code>rules/typescript/</code>, <code>rules/python/</code>
+        하위 디렉토리로 구성합니다. 각 파일은 실제 원문(영어)과 전체 한국어 번역을 탭으로 함께 제공합니다.
+      </p>
+    </header>
+
+    <section id="how-it-applies">
+      <h2>이 규칙이 실제로 적용되려면</h2>
+      <div class="warn">
+        <strong>플러그인 루트의 rules/는 자동으로 로드되지 않습니다.</strong>
+        <code>agents/</code>·<code>hooks/hooks.json</code>과 달리, <code>rules/</code>는 Claude Code
+        플러그인 매니페스트가 인식하는 컨벤션이 아닙니다 — 여기 있는 파일은 어디에 복사해서 쓸지 정하는
+        <strong>배포용 소스</strong>일 뿐입니다.
+      </div>
+      <p>
+        실제로 매 세션 항상 로드되는 곳은 <code>.claude/rules/</code>(프로젝트 단위)와
+        <code>~/.claude/rules/</code>(전역)입니다. ECC 자신도 자기 저장소에
+        <code>.claude/rules/*.md</code>를 따로 두고 이 방식으로 적용합니다. 그래서 pcc의 규칙을 어떤
+        프로젝트에 실제로 적용하고 싶다면 아래처럼 한 번 복사해두면 됩니다.
+      </p>
+      <pre><code># 이 TypeScript/Python 규칙을 쓰고 싶은 프로젝트에서 (프로젝트 로컬로 적용)
+mkdir -p .claude/rules/pcc
+cp -r /path/to/pcc/rules/typescript .claude/rules/pcc/
+cp -r /path/to/pcc/rules/python .claude/rules/pcc/
+
+# 또는 모든 프로젝트에 전역으로 적용
+mkdir -p ~/.claude/rules/pcc
+cp -r /path/to/pcc/rules/typescript ~/.claude/rules/pcc/</code></pre>
+      <p class="note">필요한 언어 디렉토리만 골라서 복사하면 됩니다 — 예를 들어 Python 프로젝트라면
+        <code>python/</code>만 복사. pcc 쪽 원본을 고치면 복사본도 다시 복사해줘야 반영됩니다(심볼릭 링크로
+        걸어두면 자동으로 따라갑니다).</p>
+    </section>
+
+    <section id="typescript">
+      <h2>TypeScript / JavaScript</h2>
+
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">rules/typescript/coding-style.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <h4>타입</h4>
+            <ul>
+              <li>익스포트되는 함수와 공유 유틸리티에는 매개변수/반환 타입을 명시. 뻔한 지역 변수 타입은 TypeScript가 추론하도록 둠.</li>
+              <li>애플리케이션 코드에서 <code>any</code> 지양. 외부/신뢰할 수 없는 입력은 <code>unknown</code>으로 받아서 사용 전에 좁힘(narrow).</li>
+              <li>확장될 수 있는 객체 모양에는 <code>interface</code>, union/intersection/매핑 타입에는 <code>type</code> 사용.</li>
+            </ul>
+            <h4>불변성</h4>
+            <p>제자리 변경(mutation) 대신 spread/<code>map</code>/<code>filter</code>를 선호.</p>
+            <h4>에러 처리</h4>
+            <ul>
+              <li><code>async</code>/<code>await</code>와 <code>try</code>/<code>catch</code> 사용, 사용하기 전에 <code>unknown</code> 에러를 좁힘.</li>
+              <li>에러를 조용히 삼키지 않음 — 로그를 남기거나 맥락을 담아 다시 던짐.</li>
+              <li>내부 에러 상세(스택 트레이스, DB 에러)를 클라이언트 응답에 노출하지 않음.</li>
+            </ul>
+            <h4>입력 검증</h4>
+            <p>외부 입력(API 바디, 쿼리 파라미터, env 변수)은 여기저기 흩어진 <code>if</code> 대신 경계에서 스키마 라이브러리(예: Zod)로 검증.</p>
+            <h4>디버그 출력</h4>
+            <p>커밋된 코드에 <code>console.log</code>를 남기지 않음 — 실제 로거를 쓰거나 커밋 전에 제거.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code># TypeScript/JavaScript Coding Style
+
+## Types
+
+- Add parameter and return types to exported functions and shared utilities. Let TypeScript infer obvious local variable types.
+- Avoid `any` in application code. Use `unknown` for external/untrusted input and narrow it before use.
+- Use `interface` for object shapes that may be extended; use `type` for unions, intersections, and mapped types.
+
+```typescript
+// WRONG
+function getErrorMessage(error: any) {
+  return error.message
+}
+
+// CORRECT
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  return "Unexpected error"
+}
+```
+
+## Immutability
+
+Prefer spread/`map`/`filter` over in-place mutation.
+
+```typescript
+// WRONG
+function updateUser(user: User, name: string): User {
+  user.name = name // mutation
+  return user
+}
+
+// CORRECT
+function updateUser(user: Readonly&lt;User&gt;, name: string): User {
+  return { ...user, name }
+}
+```
+
+## Error Handling
+
+- Use `async`/`await` with `try`/`catch`; narrow `unknown` errors before using them.
+- Never swallow an error silently — log it or rethrow with context.
+- Don't leak internal error details (stack traces, DB errors) into client-facing responses.
+
+## Input Validation
+
+Validate external input (API bodies, query params, env vars) at the boundary with a schema library (e.g. Zod) rather than ad-hoc `if` checks scattered through the code.
+
+## Debug Output
+
+No `console.log` left in committed code — use a real logger, or remove it before committing.
+</code></pre>
+        </div>
+      </article>
+
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">rules/typescript/security.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <h4>시크릿 관리</h4>
+            <p>API 키를 하드코딩하지 않고 <code>process.env</code>로 읽되, 값이 없으면 에러를 던짐.</p>
+            <h4>흔한 취약점</h4>
+            <ul>
+              <li><strong>SQL 인젝션</strong> — 파라미터화된 쿼리 사용, 사용자 입력을 쿼리에 문자열로 이어붙이지 않음.</li>
+              <li><strong>XSS</strong> — 이스케이프되지 않은 사용자 입력을 HTML/JSX에 렌더링하지 않음. 원본 HTML이 꼭 필요하면 DOMPurify 등으로 정제.</li>
+              <li><strong>경로 탐색(path traversal)</strong> — 사용자 입력으로 파일 경로를 만들 때는 먼저 검증/정규화.</li>
+              <li><strong>취약한 의존성</strong> — 보안 민감한 경로에 의존성을 추가하기 전에 <code>npm audit</code> 결과 확인.</li>
+            </ul>
+            <h4>리뷰</h4>
+            <p>보안 민감 변경(인증, 결제, 사용자 입력 처리)을 머지하기 전에 <code>/code-review</code>를 실행 — <code>code-reviewer</code> 에이전트가 이런 항목을 CRITICAL로 취급함.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code># TypeScript/JavaScript Security
+
+## Secret Management
+
+```typescript
+// NEVER
+const apiKey = "sk-proj-xxxxx"
+
+// ALWAYS
+const apiKey = process.env.API_KEY
+if (!apiKey) {
+  throw new Error("API_KEY not configured")
+}
+```
+
+## Common Vulnerabilities
+
+- **SQL injection** — use parameterized queries, never string-concatenate user input into a query.
+- **XSS** — never render unescaped user input into HTML/JSX. Sanitize with a library (e.g. DOMPurify) if raw HTML is unavoidable.
+- **Path traversal** — never build a filesystem path from user input without validating/normalizing it first.
+- **Insecure dependencies** — check `npm audit` output before adding a new dependency to a security-sensitive path.
+
+## Review
+
+Run `/code-review` before merging security-sensitive changes (auth, payments, user input handling) — the `code-reviewer` agent treats these as CRITICAL-severity findings.
+</code></pre>
+        </div>
+      </article>
+
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">rules/typescript/testing.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <h4>프레임워크</h4>
+            <p>프로젝트가 이미 쓰고 있는 걸 그대로 사용 (신규 프로젝트라면 보통 Vitest나 Jest). 이미 테스트 러너가 있는 프로젝트에 두 번째 러너를 들이지 않음.</p>
+            <h4>구조 — Arrange/Act/Assert</h4>
+            <p>준비(Arrange) → 실행(Act) → 검증(Assert) 3단 구조로 테스트를 작성.</p>
+            <h4>네이밍</h4>
+            <p>테스트 이름은 구현이 아니라 관찰 가능한 동작을 설명 (예: "API 키가 없으면 에러를 던진다" — "test1" 같은 이름 금지).</p>
+            <h4>커버리지 범위</h4>
+            <ul>
+              <li>새 코드 경로는 그걸 도입하는 같은 PR에서 테스트도 함께 작성.</li>
+              <li>happy path보다 실패/엣지 케이스를 우선 — 보통 버그는 happy path보다 거기 숨어있을 확률이 낮음(즉 엣지 케이스에 더 자주 숨음).</li>
+              <li>사소한 glue 코드(단순 재수출, 타입 전용 파일)까지 100% 커버리지를 쫓지 않음.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code># TypeScript/JavaScript Testing
+
+## Framework
+
+Use whatever the project already uses (Vitest or Jest are the common defaults for new projects). Don't introduce a second test runner into a project that already has one.
+
+## Structure — Arrange/Act/Assert
+
+```typescript
+test("returns empty array when no items match", () => {
+  // Arrange
+  const items = [{ active: false }]
+
+  // Act
+  const result = filterActive(items)
+
+  // Assert
+  expect(result).toEqual([])
+})
+```
+
+## Naming
+
+Test names describe the observable behavior, not the implementation:
+
+```typescript
+test("throws when API key is missing") // GOOD
+test("test1") // BAD
+```
+
+## What to Cover
+
+- New code paths get a test in the same PR that introduces them.
+- Prioritize the failure/edge case over the happy path — the happy path is usually the least likely place a bug hides.
+- Don't chase 100% coverage on trivial glue code (simple re-exports, type-only files).
+</code></pre>
+        </div>
+      </article>
+    </section>
+
+    <section id="python">
+      <h2>Python</h2>
+
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">rules/python/coding-style.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <h4>표준</h4>
+            <ul>
+              <li>PEP 8을 따름.</li>
+              <li>함수 시그니처(파라미터 + 반환 타입)에 타입 어노테이션 추가. 단순한 지역 변수는 추론에 맡김.</li>
+            </ul>
+            <h4>불변성</h4>
+            <p>값 객체에는 <code>@dataclass(frozen=True)</code> 같은 불변 자료구조를 선호.</p>
+            <h4>흔한 함정</h4>
+            <ul>
+              <li>가변 기본 인자(<code>def f(x=[])</code>) — 호출마다 공유되는 리스트가 되어버림. <code>None</code>을 기본값으로 두고 함수 안에서 새로 만들 것.</li>
+              <li>모든 예외를 삼키는 bare <code>except:</code> — 예상하는 예외만 잡고, 나머지는 드러나게 둠.</li>
+            </ul>
+            <h4>포매팅</h4>
+            <p>포매팅은 <strong>black</strong>, import 정렬은 <strong>isort</strong>, 린팅은 <strong>ruff</strong>.</p>
+            <h4>디버그 출력</h4>
+            <p>커밋된 코드에 임시 <code>print()</code>를 남기지 않음 — <code>logging</code> 사용.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code># Python Coding Style
+
+## Standards
+
+- Follow PEP 8.
+- Add type annotations on function signatures (params + return type). Let simple local variables be inferred.
+
+## Immutability
+
+Prefer immutable data structures for value objects:
+
+```python
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class User:
+    name: str
+    email: str
+```
+
+## Common Pitfalls
+
+```python
+# WRONG: mutable default argument — shared across all calls
+def add_item(item, items=[]):
+    items.append(item)
+    return items
+
+# CORRECT
+def add_item(item, items=None):
+    items = items if items is not None else []
+    items.append(item)
+    return items
+```
+
+```python
+# WRONG: swallows everything, including bugs
+try:
+    risky()
+except:
+    pass
+
+# CORRECT: catch what you expect, let the rest surface
+try:
+    risky()
+except ValueError as e:
+    logger.error("risky() failed: %s", e)
+```
+
+## Formatting
+
+- **black** for formatting, **isort** for import order, **ruff** for linting.
+
+## Debug Output
+
+No stray `print()` left in committed code — use `logging` instead.
+</code></pre>
+        </div>
+      </article>
+
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">rules/python/security.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <h4>시크릿 관리</h4>
+            <p><code>dotenv</code>로 로드하고 <code>os.environ["KEY"]</code>로 읽기 — 값이 없으면 <code>KeyError</code>로 요란하게 실패시킴(조용히 넘어가지 않음).</p>
+            <h4>흔한 취약점</h4>
+            <ul>
+              <li><strong>SQL 인젝션</strong> — 파라미터화된 쿼리(<code>cursor.execute(query, params)</code>) 사용, f-string/<code>.format()</code>으로 쿼리를 만들지 않음.</li>
+              <li><strong>셸 인젝션</strong> — 사용자 입력으로 f-string 셸 명령을 만들지 않음. <code>subprocess.run([...])</code>에 리스트 인자로 넘기고 <code>shell=True</code>는 쓰지 않음.</li>
+              <li><strong>타임아웃 없는 요청</strong> — 외부 서비스로의 모든 <code>requests</code>/<code>httpx</code> 호출에 명시적 <code>timeout=</code> 지정.</li>
+              <li><strong>신뢰할 수 없는 입력에 pickle/eval</strong> — 사용자나 외부 서비스에서 온 데이터를 <code>pickle.load</code>/<code>eval</code>하지 않음.</li>
+            </ul>
+            <h4>스캐닝</h4>
+            <p>보안 민감 변경을 머지하기 전에 <code>bandit -r src/</code>로 정적 보안 분석.</p>
+            <h4>리뷰</h4>
+            <p>보안 민감 변경(인증, 결제, 외부 입력 처리)을 머지하기 전에 <code>/code-review</code>를 실행 — <code>code-reviewer</code> 에이전트가 이런 항목을 CRITICAL로 취급함.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code># Python Security
+
+## Secret Management
+
+```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+api_key = os.environ["OPENAI_API_KEY"]  # raises KeyError if missing — fail loud, not silent
+```
+
+## Common Vulnerabilities
+
+- **SQL injection** — use parameterized queries (`cursor.execute(query, params)`), never f-string/`.format()` a query.
+- **Shell injection** — never build a shell command with f-strings from user input; use `subprocess.run([...])` with a list of args, not `shell=True`.
+- **Requests without a timeout** — every `requests`/`httpx` call to an external service needs an explicit `timeout=`.
+- **Pickle/eval on untrusted input** — never `pickle.load`/`eval` data that came from a user or an external service.
+
+## Scanning
+
+`bandit -r src/` for static security analysis before merging security-sensitive changes.
+
+## Review
+
+Run `/code-review` before merging security-sensitive changes (auth, payments, external input handling) — the `code-reviewer` agent treats these as CRITICAL-severity findings.
+</code></pre>
+        </div>
+      </article>
+
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">rules/python/testing.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <h4>프레임워크</h4>
+            <p><strong>pytest</strong> 사용.</p>
+            <h4>커버리지</h4>
+            <p><code>pytest --cov=src --cov-report=term-missing</code></p>
+            <h4>구조 — Arrange/Act/Assert</h4>
+            <p>준비 → 실행 → 검증 3단 구조로 테스트를 작성.</p>
+            <h4>구성</h4>
+            <p><code>pytest.mark</code>로 빠른 단위 테스트와 느린 통합 테스트를 구분 (<code>@pytest.mark.unit</code>, <code>@pytest.mark.integration</code>).</p>
+            <h4>커버리지 범위</h4>
+            <ul>
+              <li>새 코드 경로는 그걸 도입하는 같은 변경에서 테스트도 함께 작성.</li>
+              <li>happy path보다 엣지 케이스(빈 입력, <code>None</code>, 네트워크 실패)를 우선.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code># Python Testing
+
+## Framework
+
+Use **pytest**.
+
+## Coverage
+
+```bash
+pytest --cov=src --cov-report=term-missing
+```
+
+## Structure — Arrange/Act/Assert
+
+```python
+def test_returns_empty_when_no_items_match():
+    # Arrange
+    items = [{"active": False}]
+
+    # Act
+    result = filter_active(items)
+
+    # Assert
+    assert result == []
+```
+
+## Organization
+
+Use `pytest.mark` to separate fast unit tests from slower integration tests:
+
+```python
+@pytest.mark.unit
+def test_calculate_total(): ...
+
+@pytest.mark.integration
+def test_database_connection(): ...
+```
+
+## What to Cover
+
+- New code paths get a test in the same change that introduces them.
+- Prioritize edge cases (empty input, `None`, network failure) over the happy path.
+</code></pre>
+        </div>
+      </article>
+    </section>
+
+  </main>
+</div>
+
+<script src="nav.js"></script>
+<script src="tabs.js"></script>
+</body>
+</html>

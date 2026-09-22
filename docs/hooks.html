@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>pcc 가이드 — Hooks</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="shell">
+
+  <nav class="toc" aria-label="목차">
+    <div class="toc-inner">
+      <div class="group-label">가이드</div>
+      <a href="index.html" data-page="index.html">개요</a>
+      <a href="index.html#structure" data-page="index.html">폴더 구조</a>
+      <div class="group-label">컴포넌트</div>
+      <a href="agents.html" data-page="agents.html">Agents</a>
+      <a href="commands.html" data-page="commands.html">Commands</a>
+      <a href="skills.html" data-page="skills.html">Skills</a>
+      <a href="hooks.html" data-page="hooks.html">Hooks</a>
+      <a href="rules.html" data-page="rules.html">Rules</a>
+      <div class="group-label">참고</div>
+      <a href="index.html#manifest" data-page="index.html">매니페스트 함정</a>
+      <a href="index.html#roadmap" data-page="index.html">로드맵</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <header class="hero">
+      <div class="eyebrow">pcc · hooks/</div>
+      <h1>Hooks</h1>
+      <p>
+        라이프사이클 자동화. <code>hooks/hooks.json</code>을 두면 Claude Code v2.1+가 컨벤션으로
+        자동 로드합니다. <code>.claude-plugin/plugin.json</code>에 <code>hooks</code> 필드를 명시적으로
+        추가하면 "Duplicate hooks file detected" 오류가 나므로 절대 추가하지 않습니다.
+      </p>
+    </header>
+
+    <section>
+      <div class="empty-state">
+        <strong>아직 없음</strong>
+        자동화가 명확히 아쉬운 지점(포맷/타입체크 자동 실행, 세션 요약 등)이 생기면 그때 짧은
+        단일 스크립트로 추가합니다. ECC는 <code>hooks/hooks.json</code>이 범용 디스패처
+        프레임워크(<code>scripts/hooks/lifecycle-hook-bootstrap.js</code> 등)를 거치는 구조인데,
+        pcc에서는 그 프레임워크를 통째로 들여오지 않고 필요한 만큼만 직접 구현합니다.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="nav.js"></script>
+</body>
+</html>

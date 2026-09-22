@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>pcc 가이드 — Skills</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="shell">
+
+  <nav class="toc" aria-label="목차">
+    <div class="toc-inner">
+      <div class="group-label">가이드</div>
+      <a href="index.html" data-page="index.html">개요</a>
+      <a href="index.html#structure" data-page="index.html">폴더 구조</a>
+      <div class="group-label">컴포넌트</div>
+      <a href="agents.html" data-page="agents.html">Agents</a>
+      <a href="commands.html" data-page="commands.html">Commands</a>
+      <a href="skills.html" data-page="skills.html">Skills</a>
+      <a href="hooks.html" data-page="hooks.html">Hooks</a>
+      <a href="rules.html" data-page="rules.html">Rules</a>
+      <div class="group-label">참고</div>
+      <a href="index.html#manifest" data-page="index.html">매니페스트 함정</a>
+      <a href="index.html#roadmap" data-page="index.html">로드맵</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <header class="hero">
+      <div class="eyebrow">pcc · skills/</div>
+      <h1>Skills</h1>
+      <p>
+        재사용 가능한 워크플로우/도메인 지식 묶음. 각 스킬은 자체 디렉토리를 가지며
+        <code>skills/&lt;name&gt;/SKILL.md</code> 형태로 작성합니다. 권장 섹션 구성은
+        When to Use / How It Works / Examples 입니다.
+      </p>
+    </header>
+
+    <section>
+      <div class="empty-state">
+        <strong>아직 없음</strong>
+        같은 워크플로우를 두 번 이상 반복하게 되면 그때 skill로 승격합니다. 에이전트/커맨드처럼
+        한 번 쓰고 끝나는 게 아니라, 여러 상황에서 Claude가 참고할 지식 뭉치일 때 skill이 적합합니다.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="nav.js"></script>
+</body>
+</html>

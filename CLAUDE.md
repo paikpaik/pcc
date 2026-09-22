@@ -19,7 +19,11 @@ pcc는 개인 전용 Claude Code 플러그인입니다. [affaan-m/ECC](https://g
 - `commands/` — 슬래시 명령어. `description:` frontmatter 필수.
 - `hooks/` — 라이프사이클 자동화 (`hooks/hooks.json`). Claude Code v2.1+가 컨벤션으로 자동 로드하므로
   `.claude-plugin/plugin.json`에 `hooks` 필드를 절대 추가하지 않는다.
-- `rules/` — 언어/도메인별 always-load 규칙. 현재 주력 스택은 TypeScript/JavaScript, Python.
+- `rules/` — 언어별 코딩 스타일/보안/테스트 규칙 (`rules/typescript/`, `rules/python/`). **주의**: 플러그인
+  루트의 `rules/`는 자동으로 로드되지 않는다 — 배포용 소스일 뿐이다. `.claude/rules/` (프로젝트) 또는
+  `~/.claude/rules/` (전역)에 있는 마크다운만 Claude Code가 매 세션 항상 로드한다 (ECC도 자기 저장소에
+  `.claude/rules/*.md`를 따로 두고 이 방식을 쓴다). 실제로 적용하려면 원하는 프로젝트에서
+  `cp -r rules/typescript ~/.claude/rules/pcc/` 식으로 복사해야 한다.
 
 ## 플러그인 매니페스트 주의사항 (`.claude-plugin/plugin.json`)
 
