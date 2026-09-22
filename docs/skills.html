@@ -34,22 +34,363 @@
       <h1>Skills</h1>
       <p>
         재사용 가능한 워크플로우/도메인 지식 묶음. 각 스킬은 자체 디렉토리를 가지며
-        <code>skills/&lt;name&gt;/SKILL.md</code> 형태로 작성합니다. 권장 섹션 구성은
-        When to Use / How It Works / Examples 입니다.
+        <code>skills/&lt;name&gt;/SKILL.md</code> 형태로 작성합니다. 각 파일은 실제 원문(영어)과
+        전체 한국어 번역을 탭으로 함께 제공합니다.
       </p>
     </header>
 
-    <section>
-      <div class="empty-state">
-        <strong>아직 없음</strong>
-        같은 워크플로우를 두 번 이상 반복하게 되면 그때 skill로 승격합니다. 에이전트/커맨드처럼
-        한 번 쓰고 끝나는 게 아니라, 여러 상황에서 Claude가 참고할 지식 뭉치일 때 skill이 적합합니다.
-      </div>
+    <section id="git-workflow">
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">skills/git-workflow/SKILL.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <table class="meta">
+          <tr><th>name</th><td>git-workflow</td></tr>
+          <tr><th>description</th><td>Git conventions for commit messages, merge vs rebase, conflict resolution, and undoing mistakes. Use when writing a commit message, deciding whether to merge or rebase, resolving a conflict, or cleaning up branches.</td></tr>
+        </table>
+        <div class="meta-ko"><strong>번역:</strong> 커밋 메시지 작성, merge/rebase 결정, 충돌 해결, 되돌리기,
+          브랜치 정리 시 사용하는 Git 컨벤션. ECC의 팀 규모별 브랜칭 전략(GitFlow 등)·리뷰어용 체크리스트는
+          빼고, 1인 개발 기준으로 실제 자주 쓰는 부분만 추려서 재작성.</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <h4>언제 쓰는가</h4>
+            <ul>
+              <li>커밋 메시지나 PR 설명을 작성할 때</li>
+              <li>merge할지 rebase할지 결정할 때</li>
+              <li>merge/rebase 충돌을 해결할 때</li>
+              <li>커밋을 되돌리거나 브랜치를 정리할 때</li>
+              <li>릴리즈 태그를 찍을 때</li>
+            </ul>
+
+            <h4>동작 방식</h4>
+
+            <p><strong>커밋 메시지 — Conventional Commits</strong><br>
+            <code>&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;</code> 형식. 주요 타입: <code>feat</code>(새 기능),
+            <code>fix</code>(버그 수정), <code>docs</code>(문서만), <code>refactor</code>(기능/수정이 아닌 코드 변경),
+            <code>test</code>(테스트 추가/수정), <code>chore</code>(의존성/설정 등 유지보수), <code>perf</code>(성능 개선).
+            "fixed stuff" 같은 맥락 없는 메시지 대신, 왜 고쳤는지가 드러나는 메시지를 씀.</p>
+
+            <p><strong>Merge vs Rebase</strong><br>
+            PR을 열기/갱신하기 전, 로컬 feature 브랜치는 <code>main</code>에 <strong>rebase</strong>해서 히스토리를
+            깔끔하게 유지 — 브랜치가 아직 로컬에만 있거나 본인만 작업 중이라 안전함.
+            브랜치가 이미 푸시되어서 다른 사람/다른 작업이 그 위에 기반했을 수 있다면 <strong>merge</strong>를 씀 —
+            공유된 히스토리를 rebase로 다시 쓰면 다른 사람의 클론이 깨짐.
+            <code>main</code>이나, 이미 PR을 열어서 누군가 리뷰한 브랜치는 절대 rebase하지 않음 — force-push는
+            리뷰 맥락을 무효화시킴. 꼭 해야 한다면 푸시 전에 명시적으로 알림.</p>
+
+            <p><strong>충돌 해결</strong><br>
+            <code>git status</code>로 충돌 파일 확인 → <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; ======= &gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> 마커를 직접 수정 →
+            <code>git add</code> → <code>git rebase --continue</code>(또는 merge라면 <code>git commit</code>).
+            한쪽이 명백히 맞다면 <code>git checkout --ours/--theirs &lt;file&gt;</code>로 단축 가능.</p>
+
+            <p><strong>되돌리기</strong></p>
+            <ul>
+              <li>마지막 커밋 취소, 변경사항은 유지 → <code>git reset --soft HEAD~1</code></li>
+              <li>마지막 커밋 취소, 변경사항도 버림(아직 안 푸시했을 때만) → <code>git reset --hard HEAD~1</code></li>
+              <li>이미 푸시/공유된 커밋 취소 → <code>git revert HEAD</code></li>
+              <li>마지막 커밋 메시지 수정 → <code>git commit --amend -m "..."</code></li>
+              <li>깜빡한 파일을 마지막 커밋에 추가 → <code>git add &lt;file&gt; && git commit --amend --no-edit</code></li>
+            </ul>
+
+            <p><strong>브랜치 정리</strong><br>
+            <code>git branch --merged main | grep -v '^\*\|main' | xargs -n1 git branch -d</code>로 머지된 로컬 브랜치 정리,
+            <code>git fetch -p</code>로 원격에서 삭제된 브랜치의 추적 참조 정리.</p>
+
+            <h4>예시</h4>
+            <p><strong>브랜치 네이밍</strong>: <code>feature/short-name</code>, <code>fix/short-name</code>, <code>hotfix/short-name</code>.</p>
+            <p><strong>PR 설명</strong>: 변경 규모에 맞게 What / Why / Testing 정도로 간단히.</p>
+            <p><strong>피해야 할 것들</strong>: 브랜치 없이 <code>main</code>에 직접 커밋, "update"/"fix"/"wip" 같은 맥락 없는 커밋 메시지,
+              <code>.env</code>/시크릿 커밋, 다른 사람이 이미 pull한 브랜치를 force-push.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code>---
+name: git-workflow
+description: Git conventions for commit messages, merge vs rebase, conflict resolution, and undoing mistakes. Use when writing a commit message, deciding whether to merge or rebase, resolving a conflict, or cleaning up branches.
+---
+
+# Git Workflow
+
+## When to Use
+
+- Writing a commit message or PR description
+- Deciding merge vs. rebase
+- Resolving a merge/rebase conflict
+- Undoing a commit or cleaning up branches
+- Cutting a release tag
+
+## How It Works
+
+### Commit Messages — Conventional Commits
+
+```
+&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;
+
+[optional body — explain why, not what]
+```
+
+| Type | Use for |
+|---|---|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation only |
+| `refactor` | Code change that isn't a feature or fix |
+| `test` | Adding/updating tests |
+| `chore` | Maintenance (deps, config) |
+| `perf` | Performance improvement |
+
+```
+# BAD: no context
+git commit -m "fixed stuff"
+
+# GOOD: specific, explains why
+git commit -m "fix(api): retry on 503 — upstream flakes during peak hours"
+```
+
+### Merge vs. Rebase
+
+- **Rebase** your local feature branch onto `main` before opening/updating a PR — keeps history linear. Safe because the branch is still local-only or yours alone.
+- **Merge** (not rebase) once a branch has been pushed and anyone/anything else may have based work on it — rewriting shared history breaks other people's clones.
+- Never rebase `main` or any branch you've already opened a PR from and someone reviewed — force-pushing invalidates their review context. If you must, say so explicitly before pushing.
+
+```bash
+# Update a local-only feature branch with the latest main
+git fetch origin
+git rebase origin/main
+git push --force-with-lease origin feature/x   # only if you're the sole contributor
+```
+
+### Conflict Resolution
+
+```bash
+git status                    # see conflicted files
+# edit file, resolve &lt;&lt;&lt;&lt;&lt;&lt;&lt; ======= &gt;&gt;&gt;&gt;&gt;&gt;&gt; markers
+git add &lt;file&gt;
+git rebase --continue          # or: git commit, if this was a merge
+```
+
+Shortcuts when one side is simply correct:
+```bash
+git checkout --ours  &lt;file&gt;   # keep current branch's version
+git checkout --theirs &lt;file&gt;  # keep incoming version
+```
+
+### Undoing Mistakes
+
+| Situation | Command |
+|---|---|
+| Undo last commit, keep changes staged | `git reset --soft HEAD~1` |
+| Undo last commit, discard changes | `git reset --hard HEAD~1` (only if unpushed) |
+| Undo a commit already pushed/shared | `git revert HEAD` |
+| Fix the last commit message | `git commit --amend -m "..."` |
+| Add a forgotten file to the last commit | `git add &lt;file&gt; && git commit --amend --no-edit` |
+
+### Branch Cleanup
+
+```bash
+git branch --merged main | grep -v '^\*\|main' | xargs -n1 git branch -d
+git fetch -p   # prune remote-tracking refs for branches deleted on the remote
+```
+
+## Examples
+
+**Branch naming**: `feature/short-name`, `fix/short-name`, `hotfix/short-name`.
+
+**PR description (adjust to the change's actual size)**:
+```markdown
+## What
+## Why
+## Testing
+```
+
+**Anti-patterns to avoid**: committing directly to `main` without a branch, vague commit messages ("update", "fix", "wip" with no context), committing `.env`/secrets, force-pushing a branch someone else has already pulled.
+</code></pre>
+        </div>
+      </article>
+    </section>
+
+    <section id="tdd-workflow">
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">skills/tdd-workflow/SKILL.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <table class="meta">
+          <tr><th>name</th><td>tdd-workflow</td></tr>
+          <tr><th>description</th><td>Test-driven development workflow — RED/GREEN/REFACTOR cycle. Use when starting a new feature, fixing a bug, or refactoring, so tests stay the source of truth for behavior.</td></tr>
+        </table>
+        <div class="meta-ko"><strong>번역:</strong> RED/GREEN/REFACTOR 사이클로 진행하는 TDD 워크플로우. 새 기능
+          시작, 버그 수정, 리팩토링 시 테스트를 동작의 근거로 유지하기 위해 사용. ECC 원본(584줄)에서 강제
+          커밋 체크포인트, TDD 증거 보고서, plan 파일 처리용 프롬프트 인젝션 방어, Supabase/Redis/OpenAI mock
+          예시처럼 엔터프라이즈/팀 감사용 절차는 빼고 핵심 사이클만 추려서 재작성 (약 80줄).</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <h4>언제 쓰는가</h4>
+            <ul>
+              <li>새 기능을 시작하거나 버그를 고칠 때</li>
+              <li>기존 코드를 리팩토링하면서 안전망이 필요할 때</li>
+              <li>"이거 고치면 다른 게 깨지지 않을까"가 실제 리스크인 모든 변경</li>
+            </ul>
+
+            <h4>동작 방식</h4>
+
+            <p><strong>1. 먼저 테스트 러너부터 확인</strong><br>
+            <code>npm test</code>라고 함부로 가정하지 않음. TypeScript/JavaScript는 <code>package.json</code>의
+            <code>scripts.test</code>(Jest, Vitest, 또는 Bun 네이티브 <code>bun:test</code>), Python은
+            <code>pyproject.toml</code>/<code>pytest.ini</code>를 확인. 프로젝트가 이미 쓰는 러너를 그대로
+            사용 — 작업 중간에 새 러너를 들이지 않음.</p>
+
+            <p><strong>2. RED — 실패하는 테스트를 먼저 작성</strong><br>
+            구현을 쓰기 전에 동작을 테스트로 먼저 서술. 실행해서 의도한 이유(구현이 없어서)로 실패하는지
+            확인 — 오타나 깨진 import 때문이 아니라. 작성만 하고 실제로 실행하지 않은 테스트는 RED로 치지
+            않음 — 구현 코드를 건드리기 전에 항상 실행해서 실패 내용을 읽을 것.</p>
+
+            <p><strong>3. GREEN — 최소 구현</strong><br>
+            테스트를 통과시킬 만큼만 코드를 작성. 지금 테스트가 요구하는 것보다 더 만들고 싶은 충동은
+            참음 — 그건 다음 테스트의 몫.</p>
+
+            <p><strong>4. REFACTOR — 안전망을 켠 채로 정리</strong><br>
+            중복 제거, 네이밍 개선, 단순화. 바꿀 때마다 테스트를 다시 돌려서 계속 초록불인지 확인.</p>
+
+            <p><strong>5. 행동 단위로 반복</strong><br>
+            기능 전체를 한 번의 거대한 사이클로 돌리지 말고, 행동 하나당 RED → GREEN → REFACTOR 사이클
+            하나. 작은 사이클일수록 문제를 더 일찍 발견하고 개별적으로 되돌리기도 쉬움.</p>
+
+            <h4>테스트 원칙</h4>
+            <ul>
+              <li>내부 상태/구현 디테일이 아니라 사용자에게 보이는 동작을 테스트.</li>
+              <li>테스트 이름은 메커니즘이 아니라 동작을 설명 (예: "API 키가 없으면 에러를 던진다" — "test3" 같은 이름 금지).</li>
+              <li>happy path보다 실패/엣지 케이스를 우선 — <code>code-reviewer</code> 에이전트가 이미 테스트 없는
+                새 코드 경로를 잡아내므로, 여기서 그 체크리스트를 중복하지 않고 함께 사용.</li>
+              <li>유닛 테스트는 빠르고 독립적으로 — 실제 네트워크/디스크 I/O 없이, 외부 서비스는 경계에서 mock.</li>
+            </ul>
+
+            <h4>예시</h4>
+            <p><strong>테스트 격리</strong>: 각 테스트는 실행 순서에 의존하지 않고 자기 데이터를 스스로 준비해야 함
+              (두 번째 테스트가 첫 번째 테스트 실행을 암묵적으로 전제하면 안 됨).</p>
+            <p><strong>브라우저 테스트 선택자 안정성</strong>: 스타일 리팩토링에 쉽게 깨지는 CSS 클래스 선택자 대신,
+              <code>button:has-text("Submit")</code>처럼 의미 있는 선택자를 선호.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code>---
+name: tdd-workflow
+description: Test-driven development workflow — RED/GREEN/REFACTOR cycle. Use when starting a new feature, fixing a bug, or refactoring, so tests stay the source of truth for behavior.
+---
+
+# TDD Workflow
+
+## When to Use
+
+- Starting a new feature or fixing a bug
+- Refactoring existing code and wanting a safety net for it
+- Any change where "did this break something else" is a real risk
+
+## How It Works
+
+### 1. Detect the test runner first
+
+Don't assume `npm test`. Check `package.json` `scripts.test` (Jest, Vitest, or Bun's native
+`bun:test`) for TypeScript/JavaScript, or `pyproject.toml`/`pytest.ini` for Python. Use
+whatever the project already runs — don't introduce a second runner mid-task.
+
+### 2. RED — write a failing test first
+
+Describe the behavior as a test before writing the implementation. Run it and confirm it
+fails for the *intended* reason (missing implementation), not a typo or broken import.
+
+```typescript
+test("returns empty array when no items match", () => {
+  expect(filterActive([{ active: false }])).toEqual([])
+})
+```
+
+```python
+def test_returns_empty_when_no_items_match():
+    assert filter_active([{"active": False}]) == []
+```
+
+A test that was written but never actually executed doesn't count as RED — always run it
+and read the failure before touching implementation code.
+
+### 3. GREEN — minimal implementation
+
+Write just enough code to make the test pass. Resist building more than the test currently
+demands — that's the next test's job.
+
+### 4. REFACTOR — clean up with the safety net on
+
+Remove duplication, improve naming, simplify. Rerun the tests after every change; they must
+stay green throughout.
+
+### 5. Repeat per behavior
+
+One RED → GREEN → REFACTOR cycle per behavior, not one giant cycle for the whole feature.
+Smaller cycles surface problems earlier and are easier to back out of individually.
+
+## Testing Principles
+
+- Test user-visible behavior, not internal state or implementation details.
+- Name the test after the behavior, not the mechanism ("throws when API key is missing", not "test3").
+- Prioritize the failure/edge case over the happy path — the `code-reviewer` agent already
+  flags new code paths with no test coverage, so pair with it rather than duplicating its checklist here.
+- Keep unit tests fast and isolated — no real network/disk I/O; mock external services at the boundary.
+
+## Examples
+
+**Test isolation** — each test should set up its own data, not depend on execution order:
+
+```typescript
+// WRONG — second test silently depends on the first having run
+test("creates user", () =&gt; { /* ... */ })
+test("updates same user", () =&gt; { /* assumes previous test's user still exists */ })
+
+// CORRECT — each test is independent
+test("creates user", () =&gt; {
+  const user = makeTestUser()
+  // ...
+})
+test("updates user", () =&gt; {
+  const user = makeTestUser()
+  // ...
+})
+```
+
+**Selector stability in browser tests** — prefer semantic selectors over brittle CSS classes:
+
+```typescript
+// WRONG — breaks on any style refactor
+await page.click(".css-x8f2a")
+
+// CORRECT — resilient to markup/style changes
+await page.click('button:has-text("Submit")')
+```
+</code></pre>
+        </div>
+      </article>
     </section>
 
   </main>
 </div>
 
 <script src="nav.js"></script>
+<script src="tabs.js"></script>
 </body>
 </html>
