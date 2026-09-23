@@ -21,6 +21,16 @@
       <a href="skills.html" data-page="skills.html">Skills</a>
       <a href="hooks.html" data-page="hooks.html">Hooks</a>
       <a href="rules.html" data-page="rules.html">Rules</a>
+      <div class="subnav">
+        <div class="subnav-group">TypeScript</div>
+        <a href="#ts-coding-style" class="subnav-link" data-file="ts-coding-style">coding-style</a>
+        <a href="#ts-security" class="subnav-link" data-file="ts-security">security</a>
+        <a href="#ts-testing" class="subnav-link" data-file="ts-testing">testing</a>
+        <div class="subnav-group">Python</div>
+        <a href="#py-coding-style" class="subnav-link" data-file="py-coding-style">coding-style</a>
+        <a href="#py-security" class="subnav-link" data-file="py-security">security</a>
+        <a href="#py-testing" class="subnav-link" data-file="py-testing">testing</a>
+      </div>
       <div class="group-label">참고</div>
       <a href="index.html#manifest" data-page="index.html">매니페스트 함정</a>
       <a href="index.html#roadmap" data-page="index.html">로드맵</a>
@@ -65,9 +75,7 @@ cp -r /path/to/pcc/rules/typescript ~/.claude/rules/pcc/</code></pre>
         걸어두면 자동으로 따라갑니다).</p>
     </section>
 
-    <section id="typescript">
-      <h2>TypeScript / JavaScript</h2>
-
+    <section id="ts-coding-style" class="file-section">
       <article class="filecard">
         <div class="filecard-head">
           <span class="path">rules/typescript/coding-style.md</span>
@@ -157,7 +165,9 @@ No `console.log` left in committed code — use a real logger, or remove it befo
 </code></pre>
         </div>
       </article>
+    </section>
 
+    <section id="ts-security" class="file-section">
       <article class="filecard">
         <div class="filecard-head">
           <span class="path">rules/typescript/security.md</span>
@@ -214,7 +224,9 @@ Run `/code-review` before merging security-sensitive changes (auth, payments, us
 </code></pre>
         </div>
       </article>
+    </section>
 
+    <section id="ts-testing" class="file-section">
       <article class="filecard">
         <div class="filecard-head">
           <span class="path">rules/typescript/testing.md</span>
@@ -284,9 +296,7 @@ test("test1") // BAD
       </article>
     </section>
 
-    <section id="python">
-      <h2>Python</h2>
-
+    <section id="py-coding-style" class="file-section">
       <article class="filecard">
         <div class="filecard-head">
           <span class="path">rules/python/coding-style.md</span>
@@ -379,7 +389,9 @@ No stray `print()` left in committed code — use `logging` instead.
 </code></pre>
         </div>
       </article>
+    </section>
 
+    <section id="py-security" class="file-section">
       <article class="filecard">
         <div class="filecard-head">
           <span class="path">rules/python/security.md</span>
@@ -440,7 +452,9 @@ Run `/code-review` before merging security-sensitive changes (auth, payments, ex
 </code></pre>
         </div>
       </article>
+    </section>
 
+    <section id="py-testing" class="file-section">
       <article class="filecard">
         <div class="filecard-head">
           <span class="path">rules/python/testing.md</span>
@@ -523,5 +537,6 @@ def test_database_connection(): ...
 
 <script src="nav.js"></script>
 <script src="tabs.js"></script>
+<script src="file-switch.js"></script>
 </body>
 </html>

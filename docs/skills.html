@@ -19,6 +19,13 @@
       <a href="agents.html" data-page="agents.html">Agents</a>
       <a href="commands.html" data-page="commands.html">Commands</a>
       <a href="skills.html" data-page="skills.html">Skills</a>
+      <div class="subnav">
+        <a href="#git-workflow" class="subnav-link" data-file="git-workflow">git-workflow</a>
+        <a href="#tdd-workflow" class="subnav-link" data-file="tdd-workflow">tdd-workflow</a>
+        <a href="#react-patterns" class="subnav-link" data-file="react-patterns">react-patterns</a>
+        <a href="#backend-patterns" class="subnav-link" data-file="backend-patterns">backend-patterns</a>
+        <a href="#python-patterns" class="subnav-link" data-file="python-patterns">python-patterns</a>
+      </div>
       <a href="hooks.html" data-page="hooks.html">Hooks</a>
       <a href="rules.html" data-page="rules.html">Rules</a>
       <div class="group-label">참고</div>
@@ -39,7 +46,7 @@
       </p>
     </header>
 
-    <section id="git-workflow">
+    <section id="git-workflow" class="file-section">
       <article class="filecard">
         <div class="filecard-head">
           <span class="path">skills/git-workflow/SKILL.md</span>
@@ -218,7 +225,7 @@ git fetch -p   # prune remote-tracking refs for branches deleted on the remote
       </article>
     </section>
 
-    <section id="tdd-workflow">
+    <section id="tdd-workflow" class="file-section">
       <article class="filecard">
         <div class="filecard-head">
           <span class="path">skills/tdd-workflow/SKILL.md</span>
@@ -387,10 +394,1180 @@ await page.click('button:has-text("Submit")')
       </article>
     </section>
 
+    <section id="react-patterns" class="file-section">
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">skills/react-patterns/SKILL.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <table class="meta">
+          <tr><th>name</th><td>react-patterns</td></tr>
+          <tr><th>description</th><td>React 18/19 patterns including hooks discipline, server/client component boundaries, Suspense + error boundaries, form actions, data fetching, and state management decision trees. Use when writing or reviewing React components.</td></tr>
+        </table>
+        <div class="meta-ko"><strong>번역:</strong> hooks 규율, 서버/클라이언트 컴포넌트 경계, Suspense +
+          에러 바운더리, 폼 액션, 데이터 페칭, 상태 관리 결정 트리를 포함한 React 18/19 패턴. React 컴포넌트를
+          작성하거나 리뷰할 때 사용. ECC 원본(342줄)에서 pcc에 없는 스킬/에이전트/커맨드(react-testing,
+          react-performance, accessibility, react-reviewer 등)로의 링크는 걷어내고, 실제 코드 패턴은 거의
+          그대로 유지 (약 280줄).</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <h4>언제 쓰는가</h4>
+            <ul>
+              <li>React 함수 컴포넌트, 커스텀 훅, 컴포넌트 트리를 작성/수정할 때</li>
+              <li>state 구조나 컴포넌트 합성을 설계할 때</li>
+              <li>로컬 state, 상위로 끌어올린 state, context, 외부 스토어 중에 고를 때</li>
+              <li>Server/Client Component(Next.js App Router, RSC)를 다룰 때</li>
+              <li>React 19 액션이나 controlled input으로 폼을 구현할 때</li>
+              <li>TanStack Query / SWR / RSC로 데이터 페칭을 연결할 때</li>
+            </ul>
+
+            <h4>핵심 원칙</h4>
+            <p><strong>1. 렌더링은 props와 state의 순수 함수</strong> — 파생 상태를 <code>useEffect</code>에
+              따로 저장하면 렌더 사이클이 하나 더 생기고, 동기화가 어긋날 수 있고, 데이터 흐름이 흐려짐.
+              렌더링 중에 바로 계산해서 쓰는 게 맞음.</p>
+            <p><strong>2. 사이드 이펙트는 렌더 밖에서</strong> — effect, mutation, 네트워크 호출, 구독은
+              이벤트 핸들러나 <code>useEffect</code> 안에서만, 렌더 바디 안에는 절대 두지 않음.</p>
+            <p><strong>3. 상속보다 합성</strong> — React에는 컴포넌트용 상속 모델이 없음.
+              <code>children</code>, render prop, 컴포넌트 props로 합성.</p>
+
+            <h4>Hooks 규율</h4>
+            <ul>
+              <li>최상위에서만 호출, 조건부 호출 금지</li>
+              <li>구독/인터벌/리스너는 전부 cleanup</li>
+              <li>새 state가 이전 값에 의존하면 함수형 업데이터(<code>setX(prev => prev + 1)</code>) 사용</li>
+              <li>기본값은 메모이제이션 안 함 — 프로파일러나 의존성 체인이 실제로 필요하다는 걸 증명했을 때만 <code>useMemo</code>/<code>useCallback</code> 추가</li>
+              <li>동일한 훅 시퀀스가 2개 이상의 컴포넌트에 반복될 때만 커스텀 훅으로 추출</li>
+            </ul>
+
+            <h4>State 위치 결정 트리</h4>
+            <p>컴포넌트 하나에서만 쓰면 <code>useState</code>를 그 안에. 부모 + 몇몇 자손이 함께 쓰면 가장
+              가까운 공통 조상으로 끌어올림. 서로 먼 가지에서 쓰고 읽기 빈도가 낮으면(테마, 인증, 로케일)
+              React Context. 트리 전체에서 갱신 빈도가 높으면 외부 스토어(Zustand, Jotai, Redux Toolkit).
+              서버에서 파생된 데이터면 서버 상태 라이브러리(TanStack Query, SWR, RSC fetch).
+              대부분의 페이지는 context나 전역 스토어가 필요 없음 — 끌어올리기가 중복되어 실제로 아플 때까지
+              추상화를 미룸.</p>
+
+            <h4>Server / Client Components (RSC)</h4>
+            <p>Server Component가 기본값 — async이고 자기 자신의 JS는 클라이언트로 보내지 않음.
+              Client Component는 <code>"use client"</code>로 옵트인.</p>
+            <p><strong>경계 규칙</strong>: 서버 → 클라이언트는 직렬화 가능한 props나 <code>children</code>만
+              전달. 클라이언트 → 서버는 <code>&lt;form action={...}&gt;</code>나 이벤트 핸들러에서 Server
+              Action을 호출. Client Component 파일에서 Server Component를 <code>import</code>하지 않음 —
+              <code>children</code>으로 합성.</p>
+
+            <h4>Suspense + 에러 바운더리</h4>
+            <p>Suspense 경계는 라우트 최상단이 아니라 데이터에 가깝게 배치해서 콘텐츠를 점진적으로 드러냄.
+              ErrorBoundary는 여전히 클래스 API라 훅 친화적 래퍼가 필요하면 <code>react-error-boundary</code>
+              사용. 바운더리는 자식의 렌더/라이프사이클/생성자에서 던진 에러만 잡음 — 이벤트 핸들러나 비동기
+              코드의 에러는 안 잡음.</p>
+
+            <h4>폼</h4>
+            <p>새 코드에는 React 19 form actions(<code>useActionState</code>)를 우선 사용. 값이 다른 UI를
+              구동하거나, 매 키 입력마다 포맷하거나, 실시간 검증이 필요할 때만 controlled input 사용.
+              멀티스텝 폼, 동적 필드 배열, 필드 간 검증처럼 복잡한 폼은 라이브러리(React Hook Form,
+              TanStack Form)를 쓰고, 이 이상 복잡도의 폼 상태를 직접 굴리는 건 유지보수 함정.</p>
+
+            <h4>데이터 페칭 결정표</h4>
+            <p>Next.js App Router의 요청 단위 데이터는 RSC의 <code>await fetch()</code>. 클라이언트 캐시 +
+              mutation + 무효화가 필요하면 TanStack Query. 가벼운 클라이언트 캐시 + 재검증은 SWR. 실시간
+              구독은 SSE/WebSocket이나 해당 라이브러리의 구독 API. 일회성 fire-and-forget은 이벤트 핸들러
+              안의 <code>fetch()</code>. 애플리케이션 데이터에 <code>useEffect</code> + <code>fetch</code>
+              조합은 피함 — 경쟁 상태, 캐시 없음, 재시도 없음, Suspense 연동 없음.</p>
+
+            <h4>합성 레시피</h4>
+            <p><code>children</code>을 통한 슬롯, Context로 상태를 공유하는 컴파운드 컴포넌트(예: Tabs),
+              부모가 렌더 결과에 파라미터를 넘겨야 할 때 쓰는 render prop(요즘은 같은 모양을 반환하는 훅이
+              보통 더 깔끔함).</p>
+
+            <h4>성능</h4>
+            <p><code>React.memo</code>는 (1) 자주 리렌더되고 (2) props가 대부분 렌더에서 동일하고 (3) 렌더
+              비용이 실측으로 크다는 세 조건을 다 만족할 때만 도움됨 — 매 렌더마다 동등성 체크 비용이 붙어서,
+              props가 자주 달라지면 순수 오버헤드가 됨. 렌더 캐스케이드를 피하려면 state를 최대한 아래로
+              내리고, 관심사별로 context를 분리하고(테마 변경이 인증 소비자까지 리렌더시키지 않게), 외부 상태
+              라이브러리에는 안전한 동시성 렌더링을 위해 <code>useSyncExternalStore</code> 사용. 리스트는
+              배열 인덱스가 아니라 DB id 같은 안정적인 key를 쓰고, 항목이 약 50개를 넘고 행이 단순하지 않으면
+              가상화(<code>@tanstack/react-virtual</code>, <code>react-window</code>).</p>
+
+            <h4>접근성</h4>
+            <ul>
+              <li><code>role</code> 속성부터 쓰기 전에 항상 시맨틱 HTML(<code>&lt;button&gt;</code>, <code>&lt;a&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>) 먼저</li>
+              <li>모든 인터랙티브 요소는 키보드로 접근 가능해야 함</li>
+              <li>폼 입력에는 라벨 필요 — <code>&lt;label htmlFor&gt;</code>, 아이콘으로만 라벨링됐다면 <code>aria-label</code></li>
+              <li>라우트 전환/모달 열고 닫을 때 포커스 관리</li>
+            </ul>
+
+            <h4>라우팅</h4>
+            <p>이 스킬은 라우터에 무관함. 위 패턴들은 React Router, TanStack Router, Next.js App Router,
+              Remix Router 어디서나 통함. 라우터별 패턴(loader, action, 중첩 레이아웃)은 각 라우터 문서를
+              따름 — React 코어 위에 얹힌 프레임워크 관심사.</p>
+
+            <h4>범위 밖</h4>
+            <ul>
+              <li><strong>Next.js 세부사항</strong>: App Router 데이터 로딩, Route Handler, Middleware, Parallel Routes — Next.js 문서 참고</li>
+              <li><strong>React Native</strong>: 플랫폼별 패턴이 많이 달라서 별도로 다뤄야 함</li>
+              <li><strong>Remix</strong>: loader/action 컨벤션이 RSC와 겹치지만 Remix 문서를 따름</li>
+            </ul>
+
+            <h4>관련</h4>
+            <p>실제 리뷰 단계는 <code>code-reviewer</code> 에이전트 / <code>/code-review</code> 명령을 사용 —
+              이미 hooks 의존성, 리스트 key, Server/Client 경계 오용 같은 TypeScript/React 항목을 체크함.
+              이 스킬은 코드를 "쓸 때" 참고하는 것이고, 그 에이전트는 "리뷰할 때" 쓰는 것.</p>
+
+            <h4>예시</h4>
+            <p><strong>디바운스 검색 커스텀 훅</strong>: 입력값을 지연시켜 <code>useDebounce</code>로 감싸고,
+              그 지연된 값을 <code>queryKey</code>로 써서 TanStack Query로 검색 API를 호출.</p>
+            <p><strong>React 19 <code>useOptimistic</code>으로 낙관적 UI</strong>: 메시지를 서버에 실제로
+              저장하기 전에 낙관적으로 목록에 먼저 추가해서 즉시 반영된 것처럼 보여줌.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code>---
+name: react-patterns
+description: React 18/19 patterns including hooks discipline, server/client component boundaries, Suspense + error boundaries, form actions, data fetching, and state management decision trees. Use when writing or reviewing React components.
+---
+
+# React Patterns
+
+Idiomatic React 18/19 patterns for building robust, accessible, performant component trees.
+
+## When to Use
+
+- Writing or modifying React function components, custom hooks, or component trees
+- Designing state shape or component composition
+- Choosing between local state, lifted state, context, and external stores
+- Working with Server Components / Client Components (Next.js App Router, RSC)
+- Implementing forms with React 19 actions or controlled inputs
+- Wiring data fetching with TanStack Query / SWR / RSC
+
+## Core Principles
+
+### 1. Render is a Pure Function of Props and State
+
+```tsx
+// Good: derive during render
+function Cart({ items }: { items: CartItem[] }) {
+  const total = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+  return &lt;span&gt;{formatMoney(total)}&lt;/span&gt;;
+}
+
+// Bad: derived state stored separately
+function Cart({ items }: { items: CartItem[] }) {
+  const [total, setTotal] = useState(0);
+  useEffect(() => {
+    setTotal(items.reduce((sum, i) => sum + i.price * i.qty, 0));
+  }, [items]);
+  return &lt;span&gt;{formatMoney(total)}&lt;/span&gt;;
+}
+```
+
+Derived state in `useEffect` adds a render cycle, can desync, and obscures the data flow.
+
+### 2. Side Effects Outside Render
+
+Effects, mutations, network calls, and subscriptions live in event handlers or `useEffect` — never in the render body.
+
+### 3. Composition Over Inheritance
+
+React has no inheritance model for components. Compose with `children`, render props, or component props.
+
+## Hooks Discipline
+
+- Top-level only, never conditional
+- Cleanup every subscription, interval, listener
+- Functional updater (`setX(prev => prev + 1)`) when new state depends on old
+- Default position: do not memoize — add `useMemo`/`useCallback` only when a profiler or a dependency chain proves it matters
+- Extract a custom hook only when the same hook sequence appears in 2+ components
+
+## State Location Decision Tree
+
+```
+Used by one component?
+  -> useState inside it
+
+Used by parent + a few descendants?
+  -> lift to nearest common ancestor
+
+Used across distant branches AND low-frequency reads (theme, auth, locale)?
+  -> React Context
+
+High-frequency updates shared across the tree?
+  -> external store (Zustand, Jotai, Redux Toolkit)
+
+Derived from a server?
+  -> server-state library (TanStack Query, SWR, RSC fetch)
+```
+
+Most pages do not need context or a global store. Resist abstraction until duplicated lifting becomes painful.
+
+## Server / Client Components (RSC)
+
+```tsx
+// Server Component - default, async, never ships JS for itself
+export default async function ProductPage({ params }: { params: { id: string } }) {
+  const product = await db.product.findUnique({ where: { id: params.id } });
+  if (!product) notFound();
+  return &lt;ProductView product={product} /&gt;;
+}
+
+// Client Component - opt in with "use client"
+"use client";
+export function AddToCartButton({ productId }: { productId: string }) {
+  const [pending, startTransition] = useTransition();
+  return (
+    &lt;button
+      disabled={pending}
+      onClick={() => startTransition(() => addToCart(productId))}
+    &gt;
+      {pending ? "Adding..." : "Add to cart"}
+    &lt;/button&gt;
+  );
+}
+```
+
+Boundaries:
+
+- Server -> Client: pass serializable props or `children`
+- Client -> Server: invoke Server Actions via `&lt;form action={...}&gt;` or imperatively from event handlers
+- Never `import` a Server Component from a Client Component file — compose them via `children` instead
+
+## Suspense + Error Boundaries
+
+```tsx
+&lt;ErrorBoundary fallback={&lt;ErrorView /&gt;}&gt;
+  &lt;Suspense fallback={&lt;UserSkeleton /&gt;}&gt;
+    &lt;UserDetail id={id} /&gt;
+  &lt;/Suspense&gt;
+&lt;/ErrorBoundary&gt;
+```
+
+- Place Suspense boundaries close to the data, not at the route root — progressively reveal content
+- Error Boundary remains a class API; use `react-error-boundary` for a hook-friendly wrapper
+- A boundary catches errors thrown during render, lifecycle, and constructors of its children — NOT in event handlers or async code
+
+## Forms
+
+### React 19 form actions (preferred for new code)
+
+```tsx
+"use client";
+import { useActionState } from "react";
+
+const initial = { error: null as string | null };
+
+async function updateUserAction(_prev: typeof initial, formData: FormData) {
+  "use server";
+  const parsed = UserSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: "Invalid input" };
+  await db.user.update({ where: { id: parsed.data.id }, data: parsed.data });
+  return { error: null };
+}
+
+export function UserForm() {
+  const [state, formAction, pending] = useActionState(updateUserAction, initial);
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name" required /&gt;
+      &lt;button type="submit" disabled={pending}&gt;Save&lt;/button&gt;
+      {state.error && &lt;p role="alert"&gt;{state.error}&lt;/p&gt;}
+    &lt;/form&gt;
+  );
+}
+```
+
+### Controlled inputs
+
+Use controlled when the value drives other UI, formats on every keystroke, or implements real-time validation.
+
+### Complex forms
+
+For multi-step forms, dynamic field arrays, or cross-field validation: use a library (React Hook Form, TanStack Form). Roll-your-own state management for forms past trivial complexity is a maintenance trap.
+
+## Data Fetching Decision Matrix
+
+| Need | Tool |
+|---|---|
+| Per-request data in Next.js App Router | RSC `await fetch()` |
+| Client-side cache + mutations + invalidation | TanStack Query |
+| Lightweight client cache + revalidation | SWR |
+| Real-time subscriptions | Server-Sent Events, WebSockets, or the lib's subscription API |
+| One-off fire-and-forget | `fetch()` in an event handler |
+
+Avoid `useEffect` + `fetch` for application data — race conditions, no cache, no retry, no Suspense integration.
+
+## Composition Recipes
+
+### Slot via `children`
+
+```tsx
+&lt;Layout&gt;
+  &lt;Header /&gt;
+  &lt;Main&gt;{content}&lt;/Main&gt;
+&lt;/Layout&gt;
+```
+
+### Compound components (shared state via Context)
+
+```tsx
+&lt;Tabs defaultValue="profile"&gt;
+  &lt;Tabs.List&gt;
+    &lt;Tabs.Trigger value="profile"&gt;Profile&lt;/Tabs.Trigger&gt;
+    &lt;Tabs.Trigger value="settings"&gt;Settings&lt;/Tabs.Trigger&gt;
+  &lt;/Tabs.List&gt;
+  &lt;Tabs.Panel value="profile"&gt;&lt;Profile /&gt;&lt;/Tabs.Panel&gt;
+  &lt;Tabs.Panel value="settings"&gt;&lt;Settings /&gt;&lt;/Tabs.Panel&gt;
+&lt;/Tabs&gt;
+```
+
+### Render prop / function-as-child
+
+Useful when the parent needs to pass parameters to the rendered output. Modern alternative: a hook (`useData(id)`) returning the same shape — usually cleaner.
+
+```tsx
+&lt;DataLoader id={id}&gt;
+  {({ data, isLoading }) => isLoading ? &lt;Spinner /&gt; : &lt;UserCard user={data} /&gt;}
+&lt;/DataLoader&gt;
+```
+
+## Performance
+
+### When `React.memo` Actually Helps
+
+Wrap a component in `React.memo` only when:
+
+1. It re-renders frequently
+2. Its props are usually the same between renders
+3. Its render is measurably expensive
+
+`React.memo` adds an equality check on every render. If props differ on most renders, the check is pure overhead.
+
+### Avoiding Render Cascades
+
+- Lift state down rather than up where possible
+- Split context: one context per concern, so a change to `themeContext` does not re-render auth consumers
+- Use `useSyncExternalStore` for external state libraries — required for safe concurrent rendering
+
+### Lists
+
+- Provide stable `key` props (database id, not array index)
+- Virtualize long lists with `@tanstack/react-virtual` or `react-window` once visible item count exceeds ~50 with non-trivial rows
+
+## Accessibility
+
+- Always render semantic HTML (`&lt;button&gt;`, `&lt;a&gt;`, `&lt;nav&gt;`, `&lt;main&gt;`) before reaching for `role` attributes
+- Every interactive element must be reachable by keyboard
+- Form inputs need labels — `&lt;label htmlFor&gt;` or `aria-label` if visually labeled by an icon
+- Manage focus on route changes and modal open/close
+
+## Routing
+
+This skill is router-agnostic. The patterns above work with React Router, TanStack Router, Next.js App Router, Remix Router. Router-specific patterns (loaders, actions, nested layouts) follow the router's documentation — those are framework concerns layered on top of React core.
+
+## Out of Scope
+
+- **Next.js specifics**: App Router data loading, Route Handlers, Middleware, Parallel Routes — use Next.js docs
+- **React Native**: platform-specific patterns differ enough to warrant separate coverage
+- **Remix**: loader/action conventions overlap with RSC but follow Remix docs
+
+## Related
+
+Use the `code-reviewer` agent / `/code-review` command for the actual review pass — it already checks the TypeScript/React items (hooks deps, list keys, Server/Client boundary misuse). This skill is for writing the code; that agent is for reviewing it.
+
+## Examples
+
+### Custom hook for debounced search
+
+```tsx
+function useDebounce&lt;T&gt;(value: T, delay = 300): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return debounced;
+}
+
+function SearchBox() {
+  const [query, setQuery] = useState("");
+  const debounced = useDebounce(query, 300);
+  const { data } = useQuery({
+    queryKey: ["search", debounced],
+    queryFn: () => searchApi(debounced),
+    enabled: debounced.length > 0,
+  });
+  return (
+    &lt;&gt;
+      &lt;input value={query} onChange={(e) => setQuery(e.target.value)} /&gt;
+      &lt;Results items={data ?? []} /&gt;
+    &lt;/&gt;
+  );
+}
+```
+
+### Optimistic UI with React 19 `useOptimistic`
+
+```tsx
+"use client";
+import { useOptimistic } from "react";
+
+export function MessageList({ messages }: { messages: Message[] }) {
+  const [optimistic, addOptimistic] = useOptimistic(
+    messages,
+    (state, newMessage: Message) => [...state, newMessage],
+  );
+
+  async function send(formData: FormData) {
+    const text = String(formData.get("text"));
+    addOptimistic({ id: "pending", text, sender: "me" });
+    await saveMessage(text);
+  }
+
+  return (
+    &lt;&gt;
+      &lt;ul&gt;{optimistic.map((m) => &lt;li key={m.id}&gt;{m.text}&lt;/li&gt;)}&lt;/ul&gt;
+      &lt;form action={send}&gt;
+        &lt;input name="text" /&gt;
+        &lt;button type="submit"&gt;Send&lt;/button&gt;
+      &lt;/form&gt;
+    &lt;/&gt;
+  );
+}
+```
+</code></pre>
+        </div>
+      </article>
+    </section>
+
+    <section id="backend-patterns" class="file-section">
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">skills/backend-patterns/SKILL.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <table class="meta">
+          <tr><th>name</th><td>backend-patterns</td></tr>
+          <tr><th>description</th><td>Backend architecture patterns, API design, database optimization, caching, error handling, and auth for Node.js/Express/Next.js API routes. Use when building or reviewing server-side routes and their data access.</td></tr>
+        </table>
+        <div class="meta-ko"><strong>번역:</strong> Node.js/Express/Next.js API 라우트를 위한 백엔드 아키텍처
+          패턴 — API 설계, DB 최적화, 캐싱, 에러 처리, 인증. ECC 원본(563줄)에서 자기 저장소("markets"
+          예측시장 앱) 전용 도메인 예시와 Supabase RPC 트랜잭션처럼 너무 특정 스택에 묶인 부분은 빼고,
+          범용 도메인(주문/Order)으로 바꿔서 재작성 (약 150줄).</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <h4>언제 쓰는가</h4>
+            <ul>
+              <li>REST API 엔드포인트를 설계할 때</li>
+              <li>repository/service/controller 계층을 구성할 때</li>
+              <li>DB 쿼리를 최적화할 때(N+1, 인덱싱)</li>
+              <li>캐싱을 추가할 때(Redis, 인메모리, HTTP 캐시 헤더)</li>
+              <li>백그라운드 작업이나 비동기 처리를 구성할 때</li>
+              <li>API의 에러 처리/검증 구조를 잡을 때</li>
+              <li>미들웨어(인증, 로깅, rate limiting)를 만들 때</li>
+            </ul>
+
+            <h4>API 설계</h4>
+            <p>리소스 기반 URL을 씀 (<code>GET /api/orders</code>, <code>POST /api/orders</code>,
+              <code>PATCH /api/orders/:id</code> 등). 필터링/정렬/페이지네이션은 쿼리 파라미터로
+              (<code>?status=pending&amp;sort=createdAt&amp;limit=20&amp;offset=0</code>).</p>
+
+            <h4>Repository + Service 계층</h4>
+            <p>데이터 접근(repository)과 비즈니스 로직(service)을 분리 — service는 구체적인 DB
+              클라이언트가 아니라 인터페이스에 의존하게 만들어서, 데이터 계층을 교체하거나 목(mock)으로
+              바꾸기 쉽게 함. 비즈니스 규칙(예: "주문은 아이템이 하나 이상이어야 한다")은 service에 두고
+              repository에는 두지 않음.</p>
+
+            <h4>미들웨어</h4>
+            <p>요청/응답 파이프라인 패턴 — 예를 들어 <code>withAuth</code> 같은 HOF로 핸들러를 감싸서,
+              토큰 검증에 실패하면 401을 반환하고 성공하면 <code>req.user</code>를 채운 뒤 원래 핸들러를
+              호출.</p>
+
+            <h4>데이터베이스 패턴</h4>
+            <p><strong>필요한 컬럼만 선택</strong>: <code>select: { id, status, total }</code>처럼 필요한
+              필드만 골라 조회 — <code>SELECT *</code> 식으로 매 행마다 전체 컬럼을 긁어오지 않음.</p>
+            <p><strong>N+1 방지</strong>: 주문마다 루프 안에서 고객 정보를 따로 조회(N번 쿼리)하지 말고,
+              전체 고객 id를 모아 한 번에 배치 조회(1번 쿼리)한 뒤 메모리에서 매핑.</p>
+
+            <h4>캐싱 — Cache-Aside</h4>
+            <p>캐시를 먼저 확인 → 없으면(cache miss) DB에서 조회 → 조회 결과를 TTL과 함께 캐시에 저장
+              → 반환. <strong>쓰기가 일어날 때마다</strong> 같은 키를 <code>redis.del</code>로 무효화해야
+              함 — 타이머 만료만 믿지 않음.</p>
+
+            <h4>에러 처리</h4>
+            <p><code>ApiError</code> 클래스로 상태 코드가 있는 에러를 표현하고, 중앙 핸들러에서
+              <code>ApiError</code>/<code>ZodError</code>/그 외 예기치 못한 에러를 구분해서 처리.
+              예기치 못한 에러는 서버 로그에는 전체 내용을 남기되, 클라이언트에는 "Internal server error"
+              처럼 내부 정보를 흘리지 않는 메시지만 반환.</p>
+            <p><strong>지수 백오프로 재시도</strong>: 실패할 때마다 1초 → 2초 → 4초처럼 대기 시간을 늘려가며
+              재시도.</p>
+
+            <h4>인증</h4>
+            <p>JWT를 검증해서 실패하면 401 <code>ApiError</code>를 던짐. 역할(role)별 허용 권한을 맵으로
+              정의해두고 <code>hasPermission</code>으로 확인하는 간단한 RBAC.</p>
+
+            <h4>Rate Limiting</h4>
+            <p>운영 API에는 프로세스별 인메모리 카운터를 절대 쓰지 않음 — 배포할 때마다 리셋되고, 여러
+              레플리카/서버리스 인스턴스 사이에 상태가 공유되지 않아서 사실상 무방비 상태가 됨. Redis 같은
+              공유 저장소나 플랫폼 자체의 리미터를 사용.</p>
+
+            <h4>백그라운드 작업</h4>
+            <p>단순한 fire-and-forget을 넘어서는 작업은 인프로세스 배열이 아니라 진짜 큐(BullMQ, SQS,
+              Cloud Tasks)를 사용 — 인프로세스 큐는 재시작/배포할 때마다 유실됨.</p>
+
+            <h4>로깅</h4>
+            <p>자유 형식 문자열이 아니라, 요청 하나를 추적할 수 있을 만큼 컨텍스트가 담긴 구조화된 JSON으로
+              로그를 남김.</p>
+
+            <h4>관련</h4>
+            <p>실제 리뷰 단계는 <code>code-reviewer</code> 에이전트 / <code>/code-review</code> 명령을
+              사용 — 이미 N+1 쿼리, 타임아웃 누락, 클라이언트로 새는 에러 상세를 "Node.js / 백엔드" 항목의
+              HIGH로 잡아냄.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code>---
+name: backend-patterns
+description: Backend architecture patterns, API design, database optimization, caching, error handling, and auth for Node.js/Express/Next.js API routes. Use when building or reviewing server-side routes and their data access.
+---
+
+# Backend Patterns
+
+Backend architecture patterns for maintainable server-side applications.
+
+## When to Use
+
+- Designing REST API endpoints
+- Structuring repository/service/controller layers
+- Optimizing database queries (N+1, indexing)
+- Adding caching (Redis, in-memory, HTTP cache headers)
+- Setting up background jobs or async processing
+- Structuring error handling and validation for APIs
+- Building middleware (auth, logging, rate limiting)
+
+## API Design
+
+```typescript
+// Resource-based URLs
+GET    /api/orders                 // List
+GET    /api/orders/:id             // Get one
+POST   /api/orders                 // Create
+PATCH  /api/orders/:id             // Update
+DELETE /api/orders/:id             // Delete
+
+// Query params for filtering, sorting, pagination
+GET /api/orders?status=pending&amp;sort=createdAt&amp;limit=20&amp;offset=0
+```
+
+## Repository + Service Layers
+
+Separate data access (repository) from business logic (service) — the service depends on
+an interface, not a concrete database client, so the data layer can be swapped or mocked.
+
+```typescript
+interface OrderRepository {
+  findById(id: string): Promise&lt;Order | null&gt;
+  create(data: CreateOrderDto): Promise&lt;Order&gt;
+}
+
+class SqlOrderRepository implements OrderRepository {
+  async findById(id: string): Promise&lt;Order | null&gt; {
+    return db.order.findUnique({ where: { id } })
+  }
+  async create(data: CreateOrderDto): Promise&lt;Order&gt; {
+    return db.order.create({ data })
+  }
+}
+
+class OrderService {
+  constructor(private repo: OrderRepository) {}
+
+  async placeOrder(data: CreateOrderDto): Promise&lt;Order&gt; {
+    // business rules live here, not in the repository
+    if (data.items.length === 0) throw new ApiError(400, "Order must have at least one item")
+    return this.repo.create(data)
+  }
+}
+```
+
+## Middleware
+
+```typescript
+export function withAuth(handler: NextApiHandler): NextApiHandler {
+  return async (req, res) =&gt; {
+    const token = req.headers.authorization?.replace("Bearer ", "")
+    if (!token) return res.status(401).json({ error: "Unauthorized" })
+
+    try {
+      req.user = await verifyToken(token)
+      return handler(req, res)
+    } catch {
+      return res.status(401).json({ error: "Invalid token" })
+    }
+  }
+}
+```
+
+## Database Patterns
+
+### Select only what you need
+
+```typescript
+// GOOD
+const orders = await db.order.findMany({ select: { id: true, status: true, total: true } })
+
+// BAD — over-fetches every column for every row
+const orders = await db.order.findMany()
+```
+
+### N+1 prevention
+
+```typescript
+// BAD — one query per order
+const orders = await getOrders()
+for (const order of orders) {
+  order.customer = await getUser(order.customerId) // N queries
+}
+
+// GOOD — batch fetch, then join in memory
+const orders = await getOrders()
+const customers = await getUsers(orders.map(o =&gt; o.customerId)) // 1 query
+const byId = new Map(customers.map(c =&gt; [c.id, c]))
+orders.forEach(o =&gt; { o.customer = byId.get(o.customerId) })
+```
+
+## Caching — Cache-Aside
+
+```typescript
+async function getOrderCached(id: string): Promise&lt;Order&gt; {
+  const cacheKey = `order:${id}`
+
+  const cached = await redis.get(cacheKey)
+  if (cached) return JSON.parse(cached)
+
+  const order = await db.order.findUnique({ where: { id } })
+  if (!order) throw new ApiError(404, "Order not found")
+
+  await redis.setex(cacheKey, 300, JSON.stringify(order)) // 5 min TTL
+  return order
+}
+```
+
+Invalidate (`redis.del`) on every write to the same key, not just on a timer.
+
+## Error Handling
+
+```typescript
+class ApiError extends Error {
+  constructor(public statusCode: number, message: string) {
+    super(message)
+  }
+}
+
+export function errorHandler(error: unknown): Response {
+  if (error instanceof ApiError) {
+    return Response.json({ error: error.message }, { status: error.statusCode })
+  }
+  if (error instanceof z.ZodError) {
+    return Response.json({ error: "Validation failed", details: error.issues }, { status: 400 })
+  }
+  console.error("Unexpected error:", error) // log full detail server-side
+  return Response.json({ error: "Internal server error" }, { status: 500 }) // never leak internals to the client
+}
+```
+
+### Retry with exponential backoff
+
+```typescript
+async function fetchWithRetry&lt;T&gt;(fn: () =&gt; Promise&lt;T&gt;, maxRetries = 3): Promise&lt;T&gt; {
+  let lastError: Error
+  for (let i = 0; i &lt; maxRetries; i++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error as Error
+      if (i &lt; maxRetries - 1) {
+        await new Promise(r =&gt; setTimeout(r, 2 ** i * 1000)) // 1s, 2s, 4s
+      }
+    }
+  }
+  throw lastError!
+}
+```
+
+## Auth
+
+```typescript
+export function verifyToken(token: string): JWTPayload {
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
+  } catch {
+    throw new ApiError(401, "Invalid token")
+  }
+}
+
+const rolePermissions: Record&lt;Role, Permission[]&gt; = {
+  admin: ["read", "write", "delete"],
+  user: ["read", "write"],
+}
+
+export function hasPermission(user: User, permission: Permission): boolean {
+  return rolePermissions[user.role].includes(permission)
+}
+```
+
+## Rate Limiting
+
+Use a shared store (Redis) or the platform's native limiter — never a per-process in-memory
+counter for production APIs. In-memory counters reset on every deploy, don't share state
+across replicas/serverless instances, and effectively fail open under load.
+
+## Background Jobs
+
+For anything beyond a trivial fire-and-forget task, use a real queue (BullMQ, SQS, Cloud
+Tasks) instead of an in-process array — an in-process queue is lost on every restart/deploy.
+
+```typescript
+// Fine for a single-process dev tool; not for anything that must survive a restart
+export async function POST(request: Request) {
+  const { orderId } = await request.json()
+  await indexQueue.add({ orderId }) // hand off instead of blocking the response
+  return Response.json({ queued: true })
+}
+```
+
+## Logging
+
+Log structured JSON with enough context to trace a single request, not free-text strings:
+
+```typescript
+logger.info("Fetching orders", { requestId, method: "GET", path: "/api/orders" })
+// ...
+logger.error("Failed to fetch orders", error, { requestId })
+```
+
+## Related
+
+Use the `code-reviewer` agent / `/code-review` command for the review pass — it already
+flags N+1 queries, missing timeouts, and error detail leaking to clients as HIGH-severity
+findings under "Node.js / Backend".
+</code></pre>
+        </div>
+      </article>
+    </section>
+
+    <section id="python-patterns" class="file-section">
+      <article class="filecard">
+        <div class="filecard-head">
+          <span class="path">skills/python-patterns/SKILL.md</span>
+          <span class="badge ready">작성됨</span>
+        </div>
+
+        <table class="meta">
+          <tr><th>name</th><td>python-patterns</td></tr>
+          <tr><th>description</th><td>Pythonic idioms — type hints, error handling, context managers, comprehensions/generators, decorators, and concurrency choice. Use when writing or reviewing Python code beyond the basic checklist in rules/python/.</td></tr>
+        </table>
+        <div class="meta-ko"><strong>번역:</strong> 타입 힌트, 에러 처리, context manager, comprehension/
+          generator, 데코레이터, 동시성 도구 선택 같은 파이썬다운 관용구. <code>rules/python/</code>의 기본
+          체크리스트를 넘어서는 코드를 작성하거나 리뷰할 때 사용. ECC 원본(751줄)에서 이미
+          <code>rules/python/</code>에 있는 내용(가변 기본 인자, bare except, black/isort/ruff 명령어)과
+          너무 장황한 pyproject.toml 전체 설정 예시는 빼고, 겹치지 않는 심화 관용구 위주로 재작성 (약 170줄).</div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" data-tab-btn="ko">번역 (한국어)</button>
+          <button class="tab-btn" data-tab-btn="en">원문 (English)</button>
+        </div>
+
+        <div class="tab-panel" data-panel="ko">
+          <div class="trans">
+            <h4>언제 쓰는가</h4>
+            <ul>
+              <li>간단한 스크립트를 넘어서는 새 Python 코드를 작성할 때</li>
+              <li>Python 코드를 관용적 구조 관점에서 리뷰할 때</li>
+              <li>threading / multiprocessing / asyncio 중 고를 때</li>
+              <li>작은 패키지의 레이아웃을 설계할 때</li>
+            </ul>
+
+            <h4>핵심 원칙</h4>
+            <p><strong>가독성이 최우선</strong> — <code>[x for x in u if x.a]</code>처럼 축약된 코드보다
+              <code>get_active_users</code>처럼 이름과 타입이 명확한 코드를 우선.</p>
+            <p><strong>LBYL보다 EAFP</strong> — 미리 조건을 확인(<code>if key in d</code>)하기보다
+              "일단 해보고 예외로 처리"(<code>try/except KeyError</code>) 스타일을 선호. 확인과 사용
+              사이의 레이스 컨디션도 피할 수 있고 더 파이썬다움.</p>
+
+            <h4>타입 힌트</h4>
+            <p>Python 3.9+에서는 <code>typing.List</code>/<code>Dict</code> 대신 <code>list[str]</code>,
+              <code>dict[str, int]</code> 같은 내장 제네릭을 사용. <strong>Protocol 기반 덕 타이핑</strong>으로
+              상속이 아니라 "이 메서드가 있는가"로 타입을 표현할 수 있음(예: <code>render()</code>가 있는
+              모든 객체를 <code>Renderable</code>로).</p>
+
+            <h4>에러 처리</h4>
+            <p><strong>예외 체이닝</strong>: 다른 타입의 예외로 다시 던질 때 <code>raise ValueError(...) from e</code>처럼
+              <code>from e</code>를 붙여서 원래 트레이스백을 보존. <strong>커스텀 예외 계층</strong>:
+              <code>AppError</code>를 베이스로 <code>ValidationError</code>, <code>NotFoundError</code> 등을
+              만들어두면 호출부가 넓게(<code>AppError</code>) 또는 좁게 원하는 대로 잡을 수 있음.</p>
+
+            <h4>Context Manager</h4>
+            <p><code>with open(...)</code> 말고도, 리소스 정리가 보장되어야 할 때는 직접 만들어 씀.
+              <code>@contextmanager</code>로 함수 하나를 빠르게 만들 수 있고(예: 실행 시간을 재는
+              <code>timer</code>), 더 많은 상태가 필요하면 <code>__enter__</code>/<code>__exit__</code>를
+              구현하는 클래스 기반 방식을 씀(예: 예외 발생 여부에 따라 commit/rollback을 가르는 DB
+              트랜잭션).</p>
+
+            <h4>Comprehension &amp; Generator</h4>
+            <p>단순한 변환은 리스트 컴프리헨션이 좋지만, 조건이 여러 겹으로 쌓이면 한 줄에 욱여넣지 말고
+              루프나 함수로 풀어씀. 한 번만 순회할 거라면 리스트 컴프리헨션보다 제너레이터 표현식을
+              선호 — 전체를 메모리에 만들지 않고 지연 평가됨.</p>
+
+            <h4>데코레이터</h4>
+            <p>함수 데코레이터를 만들 땐 <code>functools.wraps(func)</code>를 꼭 붙여서
+              <code>func.__name__</code>/docstring이 보존되게 함. 파라미터를 받는 데코레이터는 한 겹 더
+              감싼 "데코레이터 팩토리" 형태(<code>@repeat(times=3)</code>처럼).</p>
+
+            <h4>동시성 — 상황에 맞는 도구 고르기</h4>
+            <p>I/O 바운드(네트워크, 디스크)는 <code>threading</code>/<code>ThreadPoolExecutor</code>. CPU
+              바운드(무거운 연산)는 <code>multiprocessing</code>/<code>ProcessPoolExecutor</code>. 전체
+              호출 스택이 async를 지원하는 동시 I/O라면 <code>asyncio</code>. CPython의 GIL 때문에
+              threading은 CPU 바운드 작업을 빠르게 만들어주지 않음 — 그건 multiprocessing의 역할.
+              호출하는 라이브러리가 끝까지 async를 지원하지 않는 한 asyncio를 억지로 쓰지 않음 — async
+              함수 안에서 동기 블로킹 호출을 섞으면 이벤트 루프 전체가 막힘.</p>
+
+            <h4>패키지 레이아웃</h4>
+            <p><code>src/&lt;package&gt;/</code> 아래 코드, <code>tests/</code>에 테스트, 루트에
+              <code>pyproject.toml</code>을 두는 표준 레이아웃. import 순서는 표준 라이브러리 → 서드파티
+              → 로컬 순이며 <code>isort</code>가 자동으로 정리해줌.</p>
+
+            <h4>성능</h4>
+            <p>많이 생성하는 클래스에는 <code>__slots__</code>로 메모리 절약(유연성과 트레이드오프).
+              문자열은 불변이라 루프 안에서 <code>+=</code>로 이어붙이면 O(n²) — <code>"".join(...)</code>으로
+              O(n)에 처리.</p>
+
+            <h4>안티패턴</h4>
+            <p><code>type(obj) == list</code> 대신 서브클래스도 인정하는 <code>isinstance(obj, list)</code>.
+              <code>value == None</code> 대신(커스텀 <code>__eq__</code>로 오버라이드될 수 있음)
+              <code>value is None</code>. <code>from os.path import *</code>처럼 네임스페이스를 오염시키는
+              와일드카드 import 대신 명시적 import.</p>
+
+            <h4>관련</h4>
+            <p><code>rules/python/coding-style.md</code>, <code>security.md</code>, <code>testing.md</code>이
+              항상 지켜야 할 체크리스트(가변 기본 인자, bare <code>except:</code>, 포매팅 도구, 시크릿)를
+              담당하고, 이 스킬은 그 체크리스트가 다루지 않는 더 깊은 관용구를 위한 참고 자료.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="en" hidden>
+          <pre><code>---
+name: python-patterns
+description: Pythonic idioms — type hints, error handling, context managers, comprehensions/generators, decorators, and concurrency choice. Use when writing or reviewing Python code beyond the basic checklist in rules/python/.
+---
+
+# Python Patterns
+
+Idiomatic Python beyond the always-apply checklist in `rules/python/` — this is for
+"how" once you already know the style rules.
+
+## When to Use
+
+- Writing new Python code, especially anything past a quick script
+- Reviewing Python code for idiomatic structure
+- Choosing between threading / multiprocessing / asyncio
+- Designing a small package's layout
+
+## Core Principles
+
+### Readability counts
+
+```python
+# Good
+def get_active_users(users: list[User]) -&gt; list[User]:
+    """Return only active users from the provided list."""
+    return [user for user in users if user.is_active]
+
+# Bad — clever, not clear
+def get_active_users(u):
+    return [x for x in u if x.a]
+```
+
+### EAFP over LBYL
+
+Python prefers "ask forgiveness" (try/except) over "look before you leap" (checking first) —
+it reads cleaner and avoids a race between the check and the use.
+
+```python
+# Good — EAFP
+def get_value(d: dict, key: str, default=None):
+    try:
+        return d[key]
+    except KeyError:
+        return default
+
+# Not wrong, just less idiomatic here
+def get_value(d: dict, key: str, default=None):
+    return d[key] if key in d else default
+```
+
+## Type Hints
+
+```python
+# Python 3.9+: built-in generics, no typing.List/Dict needed
+def process_items(items: list[str]) -&gt; dict[str, int]:
+    return {item: len(item) for item in items}
+
+T = TypeVar("T")
+def first(items: list[T]) -&gt; T | None:
+    return items[0] if items else None
+```
+
+**Protocol-based duck typing** — type by capability, not by inheritance:
+
+```python
+from typing import Protocol
+
+class Renderable(Protocol):
+    def render(self) -&gt; str: ...
+
+def render_all(items: list[Renderable]) -&gt; str:
+    return "\n".join(item.render() for item in items)
+```
+
+## Error Handling
+
+**Exception chaining** — preserve the original traceback when re-raising as a different type:
+
+```python
+def process_data(data: str) -&gt; Result:
+    try:
+        parsed = json.loads(data)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Failed to parse data: {data}") from e
+```
+
+**Custom exception hierarchy** — lets callers catch broadly (`AppError`) or specifically:
+
+```python
+class AppError(Exception):
+    """Base for all application errors."""
+
+class ValidationError(AppError):
+    """Input validation failed."""
+
+class NotFoundError(AppError):
+    """Requested resource doesn't exist."""
+
+def get_user(user_id: str) -&gt; User:
+    user = db.find_user(user_id)
+    if not user:
+        raise NotFoundError(f"User not found: {user_id}")
+    return user
+```
+
+## Context Managers
+
+Beyond `with open(...)`, write your own when a resource needs guaranteed cleanup:
+
+```python
+from contextlib import contextmanager
+
+@contextmanager
+def timer(name: str):
+    start = time.perf_counter()
+    yield
+    print(f"{name} took {time.perf_counter() - start:.4f}s")
+
+with timer("data processing"):
+    process_large_dataset()
+```
+
+Class-based, when you need more state than a generator can hold cleanly:
+
+```python
+class DatabaseTransaction:
+    def __init__(self, connection):
+        self.connection = connection
+
+    def __enter__(self):
+        self.connection.begin_transaction()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        (self.connection.rollback if exc_type else self.connection.commit)()
+        return False  # never suppress the exception
+```
+
+## Comprehensions &amp; Generators
+
+```python
+# Good — simple transform
+names = [user.name for user in users if user.is_active]
+
+# Bad — too many conditions crammed into one line, expand to a loop/function instead
+result = [x * 2 for x in items if x &gt; 0 if x % 2 == 0]
+```
+
+Prefer a generator expression over a list comprehension when you're only iterating once —
+it avoids building the whole thing in memory:
+
+```python
+# Good — lazy, O(1) memory
+total = sum(x * x for x in range(1_000_000))
+
+# Wasteful — builds the full list just to sum it
+total = sum([x * x for x in range(1_000_000)])
+```
+
+## Decorators
+
+```python
+import functools
+
+def timer(func):
+    @functools.wraps(func)  # preserves func.__name__, docstring — don't skip this
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        print(f"{func.__name__} took {time.perf_counter() - start:.4f}s")
+        return result
+    return wrapper
+
+@timer
+def slow_function(): ...
+```
+
+Parameterized (a decorator factory — one more nesting level):
+
+```python
+def repeat(times: int):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return [func(*args, **kwargs) for _ in range(times)]
+        return wrapper
+    return decorator
+
+@repeat(times=3)
+def greet(name: str) -&gt; str:
+    return f"Hello, {name}!"
+```
+
+## Concurrency — Pick the Right Tool
+
+| Workload | Tool |
+|---|---|
+| I/O-bound (network calls, disk) | `threading` / `concurrent.futures.ThreadPoolExecutor` |
+| CPU-bound (heavy computation) | `multiprocessing` / `ProcessPoolExecutor` |
+| Concurrent I/O, whole call stack can be async | `asyncio` |
+
+Threading doesn't speed up CPU-bound work in CPython (the GIL) — that's what multiprocessing
+is for. Don't reach for asyncio unless the libraries you're calling actually support it end
+to end; mixing sync blocking calls into an async function blocks the whole event loop.
+
+```python
+async def fetch_all(urls: list[str]) -&gt; dict[str, str]:
+    async def fetch(url: str) -&gt; str:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                return await response.text()
+
+    results = await asyncio.gather(*(fetch(u) for u in urls), return_exceptions=True)
+    return dict(zip(urls, results))
+```
+
+## Package Layout
+
+```
+myproject/
+├── src/
+│   └── mypackage/
+│       ├── __init__.py
+│       ├── main.py
+│       ├── api/
+│       └── models/
+├── tests/
+│   ├── conftest.py
+│   └── test_*.py
+├── pyproject.toml
+```
+
+Import order: stdlib, then third-party, then local — `isort` enforces this automatically.
+
+## Performance
+
+```python
+# __slots__ trades flexibility for memory — worth it for classes you instantiate a lot
+class Point:
+    __slots__ = ["x", "y"]
+    def __init__(self, x: float, y: float):
+        self.x, self.y = x, y
+```
+
+```python
+# Bad — O(n²), strings are immutable so += rebuilds the string each time
+result = ""
+for item in items:
+    result += str(item)
+
+# Good — O(n)
+result = "".join(str(item) for item in items)
+```
+
+## Anti-Patterns
+
+```python
+# Bad — fragile type check
+if type(obj) == list:
+    process(obj)
+
+# Good — respects subclasses
+if isinstance(obj, list):
+    process(obj)
+```
+
+```python
+# Bad — == on None can be overridden by a custom __eq__
+if value == None:
+    process()
+
+# Good
+if value is None:
+    process()
+```
+
+```python
+# Bad — pollutes the namespace, unclear where names came from
+from os.path import *
+
+# Good
+from os.path import join, exists
+```
+
+## Related
+
+`rules/python/coding-style.md`, `security.md`, `testing.md` cover the always-apply checklist
+(mutable default args, bare `except:`, formatting tools, secrets). This skill is the deeper
+reference for idioms that checklist doesn't spell out.
+</code></pre>
+        </div>
+      </article>
+    </section>
+
   </main>
 </div>
 
 <script src="nav.js"></script>
 <script src="tabs.js"></script>
+<script src="file-switch.js"></script>
 </body>
 </html>
